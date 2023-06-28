@@ -26,3 +26,4 @@ Route::post('funds', [FundController::class, 'store']);
 Route::put('funds/{id}', [FundController::class, 'update']);
 Route::delete('funds/{id}', [FundController::class, 'destroy']);
 
+

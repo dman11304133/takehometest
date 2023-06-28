@@ -19,7 +19,7 @@
 </head>
 <body>
 <h1>Potentially Duplicate Funds</h1>
-
+<a href="{{ route('funds.index') }}">Go Back to Fund Index</a>
 <table>
     <thead>
     <tr>
@@ -45,6 +45,6 @@
     </tbody>
 </table>
 
-<a href="{{ route('funds.index') }}">Go Back to Fund Index</a>
+
 </body>
 </html>

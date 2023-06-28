@@ -52,6 +52,7 @@ class FundController extends Controller
         return view('funds.create', compact('managers', 'companies'));
     }
 
+
     public function getPotentialDuplicates()
     {
         // Logic to retrieve potentially duplicate funds
@@ -63,6 +64,8 @@ class FundController extends Controller
 
         return $potentialDuplicates;
     }
+
+
 
     public function potentialDuplicates()
     {
@@ -112,34 +115,77 @@ class FundController extends Controller
         return redirect()->route('funds.index');
     }
 
-    public function edit(Fund $fund)
+    public function edit($id)
     {
+        $fund = Fund::with('companies')->findOrFail($id);
         $managers = FundManager::all();
         $companies = Company::all();
+        $aliases = Alias::all();
 
-        return view('funds.edit', compact('fund', 'managers', 'companies'));
+        return view('funds.edit', compact('fund', 'managers', 'companies', 'aliases', 'id'));
     }
 
-    public function update(Request $request, Fund $fund)
+
+
+
+
+
+    public function update(Fund $fund, Request $request)
     {
-        try {
-            $fundData = $this->validateFundData($request);
-        } catch (ValidationException $e) {
-            return redirect()->back()->withErrors($e->errors())->withInput();
-        }
+        // Retrieve and validate the request data
+        $requestData = $request->validate([
+            'name' => 'required|string',
+            'manager_id' => 'required|exists:fund_managers,id',
+            'aliases' => 'nullable|array',
+            'aliases.*' => 'string',
+            'company_ids' => 'nullable|array',
+            'company_ids.*' => 'exists:companies,id',
+        ]);
 
-        $fund->update($fundData);
+        // Update the fund data
+        $fund->update($requestData);
 
-        if ($this->isDuplicateFund($fund)) {
-            $this->handleDuplicateFundWarning($fund->name, $fund->manager->name);
-            session()->flash('message', 'Duplicate fund detected!');
-        }
+        // Update the aliases
+        $aliases = $requestData['aliases'] ?? [];
+        $fund->aliases()->delete(); // Delete existing aliases
+        $fund->aliases()->saveMany(
+            collect($aliases)->map(function ($alias) {
+                return new Alias(['alias' => $alias]);
+            })
+        );
 
-        dispatch(new UpdateFundJob($fundData, $fundData['alias_name'] ?? [], $fund));
+        // Update the companies
+        $companyIds = $requestData['company_ids'] ?? [];
+        $fund->fundCompanyInvestments()->delete(); // Delete existing company investments
+        $fund->fundCompanyInvestments()->saveMany(
+            collect($companyIds)->map(function ($companyId) {
+                return new FundCompanyInvestment(['company_id' => $companyId]);
+            })
+        );
 
-        return redirect()->route('funds.index');
+        // Redirect to the funds index page with a success message
+        return redirect()->route('funds.index')->with('message', 'Fund updated successfully.');
     }
 
+
+    private function updateAliases(Fund $fund, array $aliases)
+    {
+        // Remove existing aliases not present in the request
+        $existingAliases = $fund->aliases->pluck('id')->toArray();
+        $aliasesToRemove = array_diff($existingAliases, $aliases);
+        Alias::whereIn('id', $aliasesToRemove)->delete();
+
+        // Add new aliases and update existing ones
+        foreach ($aliases as $alias) {
+            Alias::updateOrCreate(['fund_id' => $fund->id, 'alias' => $alias]);
+        }
+    }
+
+    private function updateCompanies(Fund $fund, array $companyIds)
+    {
+        // Sync the pivot table for companies
+        $fund->companies()->sync($companyIds);
+    }
     private function validateFundData(Request $request): array
     {
         return $request->validate([

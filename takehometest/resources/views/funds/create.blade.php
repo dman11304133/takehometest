@@ -76,7 +76,7 @@
 </head>
 <body>
 <h1>Create Fund</h1>
-
+<a href="{{ route('funds.index') }}">Go Back to Fund Index</a>
 <form action="{{ route('funds.store') }}" method="POST">
     @csrf
 

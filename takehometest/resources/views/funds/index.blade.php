@@ -93,8 +93,11 @@
                 @endforeach
             </td>
             <td>
-                <a class="edit-link">Edit</a>
+                <a class="edit-link" href="{{ route('funds.edit', $fund->id) }}">Edit</a>
             </td>
+
+
+
         </tr>
     @endforeach
     </tbody>
