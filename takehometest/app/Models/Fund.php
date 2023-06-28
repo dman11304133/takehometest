@@ -18,7 +18,7 @@ class Fund extends Model
 
     public function aliases()
     {
-        return $this->hasMany(Alias::class)->onDelete('cascade');
+        return $this->hasMany(Alias::class, 'fund_id');
     }
 
     public function fundCompanyInvestments()
