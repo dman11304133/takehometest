@@ -30,6 +30,30 @@ Sure! Here are the revised instructions for running and testing your Laravel pro
    - `DB_USERNAME`: PostgreSQL database username
    - `DB_PASSWORD`: PostgreSQL database password
 
+Configuring Rabbitmq
+Open the .env file in a text editor.
+
+Locate the following lines:
+
+dotenv
+Copy code
+RABBITMQ_HOST=127.0.0.1
+RABBITMQ_PORT=5672
+RABBITMQ_USER=${RABBITMQ_USER}
+RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+RABBITMQ_VHOST=${RABBITMQ_VHOST}
+Replace the ${RABBITMQ_USER}, ${RABBITMQ_PASSWORD}, and ${RABBITMQ_VHOST} placeholders with the actual values for your RabbitMQ setup.
+
+For example, if your RabbitMQ username is myuser, password is mypassword, and vhost is /myvhost, the updated lines would look like this:
+
+dotenv
+Copy code
+RABBITMQ_HOST=127.0.0.1
+RABBITMQ_PORT=5672
+RABBITMQ_USER=myuser
+RABBITMQ_PASSWORD=mypassword
+RABBITMQ_VHOST=/myvhost
+
 8. Generate a new application key by running the following command:
    ```bash
    php artisan key:generate
