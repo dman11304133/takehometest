@@ -52,7 +52,7 @@
     <form action="{{ route('funds.update', $fund->id) }}" method="POST">
         @csrf
         @method('PUT')
-
+<h1>Update Fund information</h1>
         <input type="hidden" name="fund" value="{{ $fund->id }}">
 
         <label for="name">Name:</label>
